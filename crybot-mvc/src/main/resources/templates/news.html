@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Crylabs | All Crypto News</title>
+</head>
+<body>
+<div th:unless="${#lists.isEmpty(newslist)}">
+    <h2>Latest news on specific cryptocurrencies</h2>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Date</th>
+            <th>Slug</th>
+            <th>URL</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="ac : ${newslist}">
+            <td th:text="${ac.title}"></td>
+            <td th:text="${ac.date}"></td>
+            <td th:text="${ac.slug}"></td>
+            <td th:text="${ac.url}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
