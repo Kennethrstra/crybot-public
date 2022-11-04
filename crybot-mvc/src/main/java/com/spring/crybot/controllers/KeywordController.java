@@ -56,3 +56,16 @@ public class KeywordController {
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }
+
+@Component
+@RequiredArgsConstructor
+class KeywordLoader {
+    private final KeywordRepository keywordRepository;
+
+    @PostConstruct
+    private void loadData() {
+        keywordRepository.saveAll(List.of(
+                new Keyword("Cardano", "2010")
+        ));
+    }
+}

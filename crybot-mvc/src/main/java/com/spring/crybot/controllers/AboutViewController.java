@@ -5,10 +5,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
-public class IndexController {
+public class AboutViewController {
 
-    @RequestMapping(value = "/index.html")
-    public ModelAndView indexPage() {
-        return new ModelAndView("index");
+    @RequestMapping(value = "/about.html")
+    public ModelAndView aboutPage() {
+        return new ModelAndView("about");
     }
 }

@@ -37,7 +37,7 @@ public class ScheduledTasks {
     private final KeywordRepository keywordRepository;
     private final PriceRepository priceRepository;
 
-    private final NewsController newsRestController;
+    private final NewsController newsController;
     private final BinanceController binanceController;
 
     @Scheduled(cron = "0 0 2 ? * *")
@@ -79,7 +79,7 @@ public class ScheduledTasks {
     void updateArticles() throws IOException {
         Iterable<Keyword> keywords = keywordRepository.findAll();
         for (Keyword keyword : keywords) {
-            List<Article> coinmarketcapArticles = newsRestController.getArticlesCoinmarketcap(keyword.getKeyword());
+            List<Article> coinmarketcapArticles = newsController.getArticlesCoinmarketcap(keyword.getKeyword());
             for (Article a : coinmarketcapArticles) {
                 if (!newsRepository.existsById(a.getSlug()) &&
                         a.getDate().contains(LocalDate.now().toString()) &&
@@ -93,7 +93,7 @@ public class ScheduledTasks {
 
     @Scheduled(cron = "0 ${random.int[0,59]} 8-18 ? * *")
     void dispatchArticles() {
-        Messager messager = new Messager("KEY:KEY", -123456789);
+        Messager messager = new Messager("KEY:KEY", -128);
         Iterable<Article> articles = newsRepository.findAll();
         for (Article a : articles) {
             if (a.isDispatch()) {

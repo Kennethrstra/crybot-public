@@ -13,6 +13,14 @@ import java.util.Locale;
 @Configuration
 public class WebMvcContextConfiguration implements WebMvcConfigurer {
 
+    @Override
+    public void addViewControllers(final ViewControllerRegistry registry) {
+        registry.addViewController("/templates/index.html").setViewName("index");
+        registry.addViewController("/templates/news.html").setViewName("news");
+        registry.addViewController("/templates/about.html").setViewName("about");
+        registry.addViewController("/templates/contact.html").setViewName("contact");
+    }
+
     @Bean
     public LocaleResolver localeResolver() {
         SessionLocaleResolver sessionLocaleResolver = new SessionLocaleResolver();
@@ -25,10 +33,5 @@ public class WebMvcContextConfiguration implements WebMvcConfigurer {
         LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
         localeChangeInterceptor.setParamName("language");
         return localeChangeInterceptor;
-    }
-
-    @Override
-    public void addViewControllers(final ViewControllerRegistry registry) {
-        registry.addViewController("/templates/index.html").setViewName("index");
     }
 }

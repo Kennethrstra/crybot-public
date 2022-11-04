@@ -22,3 +22,4 @@ public class PriceController {
         return priceRepository.findAll();
     }
 }
+
