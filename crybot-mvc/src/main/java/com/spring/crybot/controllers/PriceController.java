@@ -22,16 +22,3 @@ public class PriceController {
         return priceRepository.findAll();
     }
 }
-
-@Component
-@RequiredArgsConstructor
-class PriceLoader {
-    private final PriceRepository priceRepository;
-
-    @PostConstruct
-    private void loadData() {
-        priceRepository.saveAll(List.of(
-                new Price("BTCEUR", 0.0)
-        ));
-    }
-}

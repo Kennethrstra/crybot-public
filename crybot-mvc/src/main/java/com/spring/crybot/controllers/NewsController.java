@@ -15,8 +15,8 @@ import org.jsoup.Jsoup;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -27,8 +27,8 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v3/news")
-public class NewsRestController {
-    Logger logger = LogManager.getLogger(NewsRestController.class);
+public class NewsController {
+    Logger logger = LogManager.getLogger(NewsController.class);
 
     private final NewsRepository newsRepository;
     private final KeywordRepository keywordRepository;
@@ -118,14 +118,10 @@ public class NewsRestController {
 }
 
 @Controller
-@RequiredArgsConstructor
-@RequestMapping("/news")
 class NewsViewController {
-    private final NewsRepository newsRepository;
 
-    @GetMapping("/all")
-    public String viewAllNews(Model model) {
-        model.addAttribute("newslist", newsRepository.findAll());
-        return "news";
+    @RequestMapping(value = "/news.html")
+    public ModelAndView indexPage() {
+        return new ModelAndView("news");
     }
 }

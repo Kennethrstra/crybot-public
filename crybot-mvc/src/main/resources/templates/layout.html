@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Crylabs | Home</title>
+    <title>Thymeleaf fragments</title>
 
     <meta charset="UTF-8">
     <meta name="description" content="Spring MVC">
@@ -12,13 +12,18 @@
     <link rel="icon" href="/favicon.ico">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
-<header th:insert="/layout.html :: header"></header>
-<div>
-    <p th:text="#{home.welcome}"></p>
-</div>
-<!--<script src="js/scripts.js"></script>-->
+<th:block th:fragment="header">
+    <ul class="navbar">
+        <li><a href="index.html">Index</a></li>
+        <li><a href="news.html">News</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="about.html">About</a></li>
+    </ul>
+</th:block>
+<th:block>
+
+</th:block>
 </body>
 </html>

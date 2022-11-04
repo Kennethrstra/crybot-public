@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/v3/keywords")
 public class KeywordController {
-    Logger logger = LogManager.getLogger(NewsRestController.class);
+    Logger logger = LogManager.getLogger(KeywordController.class);
 
     private final KeywordRepository keywordRepository;
 

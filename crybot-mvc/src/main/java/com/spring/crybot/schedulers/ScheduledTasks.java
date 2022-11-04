@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.spring.crybot.controllers.BinanceController;
-import com.spring.crybot.controllers.NewsRestController;
+import com.spring.crybot.controllers.NewsController;
 import com.spring.crybot.models.*;
 import com.spring.crybot.repositories.AccountRepository;
 import com.spring.crybot.repositories.KeywordRepository;
@@ -30,14 +30,14 @@ import java.util.Optional;
 @EnableScheduling
 @RequiredArgsConstructor
 public class ScheduledTasks {
-    Logger logger = LogManager.getLogger(NewsRestController.class);
+    Logger logger = LogManager.getLogger(ScheduledTasks.class);
 
     private final AccountRepository accountRepository;
     private final NewsRepository newsRepository;
     private final KeywordRepository keywordRepository;
     private final PriceRepository priceRepository;
 
-    private final NewsRestController newsRestController;
+    private final NewsController newsRestController;
     private final BinanceController binanceController;
 
     @Scheduled(cron = "0 0 2 ? * *")
