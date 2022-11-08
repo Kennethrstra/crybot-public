@@ -13,11 +13,38 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="stylesheet" th:href="@{/css/styles.css}">
+
+    <style>
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+            background: linear-gradient(35deg, rgba(9, 9, 9, 1) 39%, rgba(6, 113, 99, 1) 71%, rgba(255, 200, 0, 1) 97%);
+            background-size: 200% 200%;
+            animation: GradientBackground 20s ease infinite;
+        }
+
+        @keyframes GradientBackground {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+    </style>
 </head>
 <body>
 <header th:insert="layout.html :: header"></header>
-<div>
-    <p th:text="#{home.welcome}"></p>
+<div class="container-top">
+    <div class="container">
+        <p th:text="#{home.welcome}"></p>
+    </div>
 </div>
 <!--<script src="js/scripts.js"></script>-->
 </body>

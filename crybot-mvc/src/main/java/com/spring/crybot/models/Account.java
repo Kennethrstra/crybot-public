@@ -14,6 +14,8 @@ public class Account {
 
     @Id
     private String name;
+    // TODO: Finish the login possiblities
+    private String password;
     private String key1;
     private String key2;
     private String exchange;

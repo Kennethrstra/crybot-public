@@ -65,7 +65,7 @@ public class ScheduledTasks {
                     double value = latestTotalAssetOfBtc(jsonObject);
                     BigDecimal e = BigDecimal.valueOf(btceur * value);
                     double eur = e.setScale(2, RoundingMode.HALF_UP).doubleValue();
-                    new Messager("KEY:KEY", account.get().getChatId())
+                    new Messager("KEY:KEY-IUJ5ow7ElGVfzKVI", account.get().getChatId())
                             .sendMessage("De waarde van je Binance wallet is BTC " + value + " (Euro = " + eur + ")");
                     logger.info(account.get().getName() + "'s wallet with a value of " + eur + " send to Telegram chat ID " + account.get().getChatId());
                 } else {
@@ -93,7 +93,7 @@ public class ScheduledTasks {
 
     @Scheduled(cron = "0 ${random.int[0,59]} 8-18 ? * *")
     void dispatchArticles() {
-        Messager messager = new Messager("KEY:KEY", -128);
+        Messager messager = new Messager("KEY:KEY-IUJ5ow7ElGVfzKVI", -128);
         Iterable<Article> articles = newsRepository.findAll();
         for (Article a : articles) {
             if (a.isDispatch()) {

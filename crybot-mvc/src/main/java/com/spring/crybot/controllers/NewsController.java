@@ -14,9 +14,7 @@ import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -114,14 +112,5 @@ public class NewsController {
             }
         }
         return articlesToday;
-    }
-}
-
-@Controller
-class NewsViewController {
-
-    @RequestMapping(value = "/news.html")
-    public ModelAndView indexPage() {
-        return new ModelAndView("news");
     }
 }

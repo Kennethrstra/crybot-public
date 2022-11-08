@@ -7,11 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
-
-import javax.annotation.PostConstruct;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -54,18 +50,5 @@ public class KeywordController {
         return (keywordRepository.findById(k.getKeyword()).isEmpty()) ?
                 new ResponseEntity<>(HttpStatus.ACCEPTED) :
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-}
-
-@Component
-@RequiredArgsConstructor
-class KeywordLoader {
-    private final KeywordRepository keywordRepository;
-
-    @PostConstruct
-    private void loadData() {
-        keywordRepository.saveAll(List.of(
-                new Keyword("Cardano", "2010")
-        ));
     }
 }

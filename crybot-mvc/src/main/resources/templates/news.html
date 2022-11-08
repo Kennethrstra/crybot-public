@@ -17,5 +17,35 @@
 <body>
 <header th:insert="layout.html :: header"></header>
 
+<form action="#" th:action="@{/news/search}" method="GET" id="newsSearchForm">
+    <fieldset>
+        <legend>Search Criteria</legend>
+        <table>
+            <tr>
+                <td><label>Title</label></td>
+                <td><input type="text"/></td>
+            </tr>
+        </table>
+    </fieldset>
+    <button id="search">Search</button>
+</form>
+<table id="newsSearchResults">
+    <thead>
+    <tr>
+        <th>Title</th>
+        <th>URL</th>
+        <th>Date</th>
+    </tr>
+    </thead>
+    <tbody>
+    <th:block th:each="news : ${newsList}">
+        <tr>
+            <td th:text="${news.title}"></td>
+            <td th:text="${news.url}"></td>
+            <td th:text="${news.date}"></td>
+        </tr>
+    </th:block>
+    </tbody>
+</table>
 </body>
 </html>

@@ -1,9 +1,12 @@
-body{
+body {
     font-family: Verdana, sans-serif;
+    color: whitesmoke;
+    background: rgb(9, 9, 9);
 }
 
 ul.navbar {
     list-style-type: none;
+    border-radius: 10px;
     margin: 0;
     padding: 0;
     overflow: hidden;
@@ -23,5 +26,5 @@ ul.navbar > li a {
 }
 
 ul.navbar > li a:hover {
-    background-color: #111;
+    background-color: gold;
 }
