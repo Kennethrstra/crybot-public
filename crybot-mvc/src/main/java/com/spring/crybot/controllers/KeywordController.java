@@ -3,8 +3,7 @@ package com.spring.crybot.controllers;
 import com.spring.crybot.models.Keyword;
 import com.spring.crybot.repositories.KeywordRepository;
 import lombok.RequiredArgsConstructor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,8 +11,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v3/keywords")
+@Slf4j
 public class KeywordController {
-    Logger logger = LogManager.getLogger(KeywordController.class);
 
     private final KeywordRepository keywordRepository;
 
@@ -25,29 +24,29 @@ public class KeywordController {
     @DeleteMapping
     void deleteKeywords() {
         keywordRepository.deleteAll();
-        logger.info("Removed all Keyword from Keyword repository");
+        log.info("KeywordController: Removed all Keywords from repository");
     }
 
-    @GetMapping("/{name}")
-    ResponseEntity<Object> getKeyword(@PathVariable String name) {
-        return (keywordRepository.existsById(name)) ?
-                new ResponseEntity<>(keywordRepository.findById(name), HttpStatus.FOUND) :
+    @GetMapping("/{id}")
+    ResponseEntity<Object> getKeyword(@PathVariable String id) {
+        return (keywordRepository.existsById(id)) ?
+                new ResponseEntity<>(keywordRepository.findById(id), HttpStatus.FOUND) :
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping("/{name}/{id}")
-    ResponseEntity<Object> addKeyword(@PathVariable String name, @PathVariable String id) {
-        Keyword k = new Keyword(name, id);
-        return (k.getKeyword().isEmpty()) ?
+    @PostMapping("/{id}/{name}")
+    ResponseEntity<Object> addKeyword(@PathVariable String id, @PathVariable String name) {
+        Keyword k = new Keyword(id, name);
+        return (k.getId().isEmpty()) ?
                 new ResponseEntity<>(HttpStatus.NO_CONTENT) :
                 new ResponseEntity<>(keywordRepository.save(k), HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/{name}/{id}")
-    ResponseEntity<Object> deleteKeyword(@PathVariable String name, @PathVariable String id) {
-        Keyword k = new Keyword(name, id);
+    @DeleteMapping("/{id}/{name}")
+    ResponseEntity<Object> deleteKeyword(@PathVariable String id, @PathVariable String name) {
+        Keyword k = new Keyword(id, name);
         keywordRepository.delete(k);
-        return (keywordRepository.findById(k.getKeyword()).isEmpty()) ?
+        return (keywordRepository.findById(k.getId()).isEmpty()) ?
                 new ResponseEntity<>(HttpStatus.ACCEPTED) :
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }

@@ -13,6 +13,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/accounts")
 public class AccountController {
+
     private final AccountRepository accountRepository;
 
     @GetMapping

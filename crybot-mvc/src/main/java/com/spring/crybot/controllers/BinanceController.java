@@ -1,65 +1,38 @@
 package com.spring.crybot.controllers;
 
-import com.google.gson.JsonParser;
-import com.spring.crybot.models.Account;
-import com.spring.crybot.repositories.AccountRepository;
 import com.spring.crybot.services.BinanceService;
 import lombok.RequiredArgsConstructor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.http.HttpEntity;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/binance")
+@RequestMapping("/api/v2/binance")
+@Slf4j
 public class BinanceController {
-    Logger logger = LogManager.getLogger(BinanceController.class);
 
-    private final AccountRepository accountRepository;
+    private final BinanceService binanceService;
 
     @GetMapping("/price/{symbol}")
-    public double getPrice(@PathVariable String symbol) {
-        HashMap<String, String> parameters = new HashMap<>();
-        parameters.put("symbol", symbol);
-        String s = new BinanceService().binanceRequest("/api/v3/avgPrice?", joinQueryParameters(parameters));
-        logger.info("Retrieving average price for " + symbol + " with value " + s);
-        return JsonParser.parseString(s).getAsJsonObject().get("price").getAsDouble();
+    ResponseEntity<Double> price(@PathVariable String symbol) {
+        double price = binanceService.getPrice(symbol);
+        return (price == 0.0) ?
+                new ResponseEntity<>(null, HttpStatus.NOT_FOUND) :
+                new ResponseEntity<>(price, HttpStatus.FOUND);
+
     }
 
     @GetMapping("/snapshot/{name}")
-    public String getSnapshot(@PathVariable String name) {
-        Account account = accountRepository.findById(name).orElse(null);
-        if (account == null) {
-            logger.warn("Account " + name + " does not exist in the DB");
-            return new HttpEntity<>(HttpStatus.NOT_FOUND).toString();
-        } else {
-            HashMap<String, String> parameters = new HashMap<>();
-            parameters.put("type", account.getExchange());
-            parameters.put("timestamp", String.valueOf(System.currentTimeMillis()));
-            logger.info("Retrieving Binance snapshot for account " + name);
-            return new BinanceService().binanceRequestSigned("/sapi/v1/accountSnapshot?", joinQueryParameters(parameters), account.getKey1(), account.getKey2());
-        }
-    }
+    ResponseEntity<String> getSnapshot(@PathVariable String name) {
+        String snapshot = binanceService.getSnapshot(name);
+        return (snapshot == null) ?
+                new ResponseEntity<>(null, HttpStatus.NOT_FOUND) :
+                new ResponseEntity<>(snapshot, HttpStatus.FOUND);
 
-    static String joinQueryParameters(HashMap<String, String> parameters) {
-        String urlPath = "";
-        boolean isFirst = true;
-        for (Map.Entry mapElement : parameters.entrySet()) {
-            if (isFirst) {
-                isFirst = false;
-                urlPath += mapElement.getKey() + "=" + mapElement.getValue();
-            } else {
-                urlPath += "&" + mapElement.getKey() + "=" + mapElement.getValue();
-            }
-        }
-        return urlPath;
     }
 }

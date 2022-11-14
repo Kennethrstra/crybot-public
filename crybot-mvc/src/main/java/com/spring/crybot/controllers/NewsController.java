@@ -1,35 +1,25 @@
 package com.spring.crybot.controllers;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.spring.crybot.models.Article;
-import com.spring.crybot.models.Keyword;
-import com.spring.crybot.repositories.KeywordRepository;
 import com.spring.crybot.repositories.NewsRepository;
+import com.spring.crybot.services.CoinMarketCapService;
 import lombok.RequiredArgsConstructor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v3/news")
+@Slf4j
 public class NewsController {
-    Logger logger = LogManager.getLogger(NewsController.class);
 
     private final NewsRepository newsRepository;
-    private final KeywordRepository keywordRepository;
+
+    private final CoinMarketCapService coinMarketCapService;
 
     @GetMapping
     Iterable<Article> getArticles() {
@@ -70,47 +60,11 @@ public class NewsController {
         }
     }
 
-    @GetMapping("/coinmarketcap/{keyword}")
-    public List<Article> getArticlesCoinmarketcap(@PathVariable String keyword) throws IOException {
-        Optional<Keyword> k = keywordRepository.findById(keyword);
-        if (k.isPresent()) {
-            Connection.Response response = Jsoup.connect("https://api.coinmarketcap.com/content/v3/news?coins=" + k.get().getId() + "&page=1&size=5")
-                    .timeout(20000)
-                    .ignoreContentType(true)
-                    .execute();
-            JsonArray array = JsonParser.parseString(response.parse().body().text()).getAsJsonObject().getAsJsonArray("data");
-            List<Article> articles = new ArrayList<>();
-            for (int i = 0; i < array.size(); i++) {
-                JsonObject meta = array.get(i).getAsJsonObject().getAsJsonObject("meta");
-                Article article = new Article(
-                        array.get(i).getAsJsonObject().get("slug").getAsString(),
-                        meta.get("title").getAsString(),
-                        meta.get("releasedAt").getAsString(),
-                        meta.get("sourceUrl").getAsString(),
-                        true);
-                articles.add(article);
-            }
-            logger.info("Retrieved " + articles.size() + " articles about " + keyword + " from Coinmarketcap.com ");
-            return articles;
-        } else {
-            return null;
-        }
-    }
-
-    @PostMapping("/coinmarketcap/{keyword}")
-    List<Article> updateArticlesCoinmarketcap(@PathVariable String keyword) throws IOException {
-        List<Article> articles = getArticlesCoinmarketcap(keyword);
-        List<Article> articlesToday = new ArrayList<>();
-        if (!articles.isEmpty()) {
-            for (Article a : articles) {
-                if (!newsRepository.existsById(a.getSlug()) &&
-                        a.getDate().contains(LocalDate.now().toString()) &&
-                        a.getTitle().toLowerCase().contains(keyword)) {
-                    newsRepository.save(a);
-                    articlesToday.add(a);
-                }
-            }
-        }
-        return articlesToday;
+    @GetMapping("/coinmarketcap/{coins}")
+    ResponseEntity<List<Article>> getArticlesCoinMarketCap(@PathVariable String coins) {
+        List<Article> articles = coinMarketCapService.getArticlesCoinMarketCap(coins);
+        return (articles.isEmpty()) ?
+                new ResponseEntity<>(null, HttpStatus.NOT_FOUND) :
+                new ResponseEntity<>(articles, HttpStatus.FOUND);
     }
 }

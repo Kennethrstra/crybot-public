@@ -11,7 +11,7 @@
     </parent>
     <groupId>com.spring.crybot</groupId>
     <artifactId>crybot-mvc</artifactId>
-    <version>4.2.0-SNAPSHOT</version>
+    <version>4.3.0-SNAPSHOT</version>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>

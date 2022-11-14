@@ -1,15 +1,18 @@
 package com.spring.crybot.bootstrap;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-@Profile("development")
+@Profile("dev")
 @Component
+@Slf4j
 public class DevelopmentDataLoader extends DataLoader {
-    Logger logger = LogManager.getLogger(ProductionDataLoader.class);
+
+    static {
+        log.info("Started DevelopmentDataLoader.class");
+    }
 
     @Autowired
     public DevelopmentDataLoader() {
@@ -17,6 +20,5 @@ public class DevelopmentDataLoader extends DataLoader {
 
     @Override
     public void loadEnvironmentSpecificData() {
-        logger.info("Loading data for development environment");
     }
 }

@@ -12,7 +12,7 @@ import java.util.Locale;
 public class LocaleConfiguration {
 
     @Bean
-    public LocaleResolver localeResolver() {
+    public LocaleResolver sessionLocaleResolver() {
         SessionLocaleResolver sessionLocaleResolver = new SessionLocaleResolver();
         sessionLocaleResolver.setDefaultLocale(Locale.US);
         return sessionLocaleResolver;

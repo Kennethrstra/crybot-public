@@ -4,88 +4,97 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.spring.crybot.controllers.BinanceController;
-import com.spring.crybot.controllers.NewsController;
 import com.spring.crybot.models.*;
 import com.spring.crybot.repositories.AccountRepository;
 import com.spring.crybot.repositories.KeywordRepository;
 import com.spring.crybot.repositories.NewsRepository;
 import com.spring.crybot.repositories.PriceRepository;
+import com.spring.crybot.services.BinanceService;
+import com.spring.crybot.services.CoinMarketCapService;
 import lombok.RequiredArgsConstructor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
+@Profile("prod")
 @Component
 @EnableScheduling
 @RequiredArgsConstructor
-public class ScheduledTasks {
-    Logger logger = LogManager.getLogger(ScheduledTasks.class);
+@Slf4j
+public class ProductionScheduledTasks {
 
     private final AccountRepository accountRepository;
     private final NewsRepository newsRepository;
     private final KeywordRepository keywordRepository;
     private final PriceRepository priceRepository;
 
-    private final NewsController newsController;
-    private final BinanceController binanceController;
+    private final CoinMarketCapService coinMarketCapService;
+    private final BinanceService binanceService;
+
+    static {
+        log.info("Started ProductionScheduledTasks.class");
+    }
 
     @Scheduled(cron = "0 0 2 ? * *")
     void updatePrice() {
+        log.info("Started Scheduled Task: updatePrice()");
         String[] symbols = {"BTCEUR"};
         for (String symbol : symbols) {
-            double value = binanceController.getPrice(symbol);
+            double value = binanceService.getPrice(symbol);
             Price price = new Price(symbol, value);
             priceRepository.save(price);
-            logger.info("Symbol " + symbol + " updated with value of " + price.getPrice());
+            log.info("Symbol " + symbol + " updated with value of " + price.getPrice());
         }
     }
 
     @Scheduled(cron = "0 0 8 ? * *")
-    void sendSnapshotKenneth() {
-        Optional<Account> account = accountRepository.findById("kenneth");
-        if (account.isPresent() && account.get().isSnapshot()) {
-            String s = binanceController.getSnapshot(account.get().getName());
-            if (s.contains("\"code\":200")) {
-                double btceur = (priceRepository.findById("BTCEUR").isPresent()) ?
-                        priceRepository.findById("BTCEUR").get().getPrice() :
-                        0.0;
-                if (btceur != 0.0) {
-                    JsonObject jsonObject = JsonParser.parseString(s).getAsJsonObject();
-                    double value = latestTotalAssetOfBtc(jsonObject);
-                    BigDecimal e = BigDecimal.valueOf(btceur * value);
-                    double eur = e.setScale(2, RoundingMode.HALF_UP).doubleValue();
-                    new Messager("KEY:KEY-IUJ5ow7ElGVfzKVI", account.get().getChatId())
-                            .sendMessage("De waarde van je Binance wallet is BTC " + value + " (Euro = " + eur + ")");
-                    logger.info(account.get().getName() + "'s wallet with a value of " + eur + " send to Telegram chat ID " + account.get().getChatId());
-                } else {
-                    logger.warn("Could not get value of BTCEUR");
+    void sendSnapshot() {
+        log.info("ProductionScheduledTasks: sendSnapshot()");
+        Iterable<Account> accounts = accountRepository.findAll();
+        accounts.forEach((Account) ->
+                {
+                    String s = binanceService.getSnapshot(Account.getName());
+                    if (s.contains("\"code\":200")) {
+                        double btceur = (
+                                priceRepository.findById("BTCEUR").isPresent()) ?
+                                priceRepository.findById("BTCEUR").get().getPrice() :
+                                0.0;
+                        if (btceur != 0.0) {
+                            JsonObject jsonObject = JsonParser.parseString(s).getAsJsonObject();
+                            double value = latestTotalAssetOfBtc(jsonObject);
+                            BigDecimal e = BigDecimal.valueOf(btceur * value);
+                            double eur = e.setScale(2, RoundingMode.HALF_UP).doubleValue();
+                            new Messager("KEY:KEY", Account.getChatId())
+                                    .sendMessage("De waarde van je Binance wallet is BTC " + value + " (Euro = " + eur + ")");
+                            log.info("ProductionScheduledTasks: " + Account.getName() + "'s wallet with a value of " + eur + " send to Telegram chat ID " + Account.getName());
+                        } else {
+                            log.warn("ProductionScheduledTasks: Could not get value of BTCEUR");
+                        }
+                    }
                 }
-            }
-        }
+        );
     }
 
     @Scheduled(cron = "0 0 0-23 ? * *")
-    void updateArticles() throws IOException {
+    void updateArticles() {
+        log.info("ProductionScheduledTasks: updateArticles()");
         Iterable<Keyword> keywords = keywordRepository.findAll();
         for (Keyword keyword : keywords) {
-            List<Article> coinmarketcapArticles = newsController.getArticlesCoinmarketcap(keyword.getKeyword());
-            for (Article a : coinmarketcapArticles) {
+            List<Article> articles = coinMarketCapService.getArticlesCoinMarketCap(keyword.getId());
+            for (Article a : articles) {
                 if (!newsRepository.existsById(a.getSlug()) &&
                         a.getDate().contains(LocalDate.now().toString()) &&
                         a.getTitle().toLowerCase().contains(keyword.getKeyword())) {
                     newsRepository.save(a);
-                    logger.info("Saved Article " + a.getUrl() + " to News repository");
+                    log.info("ProductionScheduledTasks: Saved Article " + a.getUrl() + " to News repository");
                 }
             }
         }
@@ -93,7 +102,8 @@ public class ScheduledTasks {
 
     @Scheduled(cron = "0 ${random.int[0,59]} 8-18 ? * *")
     void dispatchArticles() {
-        Messager messager = new Messager("KEY:KEY-IUJ5ow7ElGVfzKVI", -128);
+        log.info("ProductionScheduledTasks: dispatchArticles()");
+        Messager messager = new Messager("KEY:KEY", -123);
         Iterable<Article> articles = newsRepository.findAll();
         for (Article a : articles) {
             if (a.isDispatch()) {
@@ -104,7 +114,7 @@ public class ScheduledTasks {
                                 a.getUrl());
                 a.setDispatch(false);
                 newsRepository.save(a);
-                logger.info("Article " + a.getUrl() + " send to Telegram chat ID " + messager.getChatId());
+                log.info("ProductionScheduledTasks: Article " + a.getUrl() + " send to Telegram chat ID " + messager.getChatId());
             }
         }
     }

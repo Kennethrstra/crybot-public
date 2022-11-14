@@ -13,6 +13,6 @@ import org.springframework.data.redis.core.RedisHash;
 public class Keyword {
 
     @Id
-    String keyword;
     String id;
+    String keyword;
 }
