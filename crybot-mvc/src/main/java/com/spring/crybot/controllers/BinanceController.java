@@ -1,5 +1,6 @@
 package com.spring.crybot.controllers;
 
+import com.spring.crybot.models.Account;
 import com.spring.crybot.services.BinanceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,15 +27,13 @@ public class BinanceController {
         return (price == 0.0) ?
                 new ResponseEntity<>(null, HttpStatus.NOT_FOUND) :
                 new ResponseEntity<>(price, HttpStatus.FOUND);
-
     }
 
     @GetMapping("/snapshot/{name}")
     ResponseEntity<String> getSnapshot(@PathVariable String name) {
-        String snapshot = binanceService.getSnapshot(name);
-        return (snapshot == null) ?
-                new ResponseEntity<>(null, HttpStatus.NOT_FOUND) :
-                new ResponseEntity<>(snapshot, HttpStatus.FOUND);
-
+        Optional<Account> account = binanceService.searchAccount(name);
+        return (account.isEmpty()) ?
+                new ResponseEntity<>("Error: Account not found in database", HttpStatus.NOT_FOUND) :
+                new ResponseEntity<>(binanceService.getSnapshot(account), HttpStatus.FOUND);
     }
 }

@@ -2,20 +2,16 @@
 <html lang="en">
 <head>
     <title>Crylabs | Contact</title>
-
     <meta charset="UTF-8">
     <meta name="description" content="Spring MVC">
     <meta name="keywords" content="HTML5, CSS, JavaEE">
     <meta name="author" content="Kenneth Rienstra">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <link rel="icon" href="/favicon.ico">
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="icon" th:href="@{/favicon.ico}">
+    <link rel="apple-touch-icon" th:href="@{/apple-touch-icon.png}">
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
 <header th:insert="layout.html :: header"></header>
-
 </body>
 </html>

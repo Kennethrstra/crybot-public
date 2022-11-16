@@ -25,8 +25,11 @@ import java.util.Optional;
 public class BinanceService {
 
     final String HMAC_SHA256 = "HmacSHA256";
-
     private final AccountRepository accountRepository;
+
+    public Optional<Account> searchAccount(String name) {
+        return accountRepository.findById(name);
+    }
 
     public double getPrice(String symbol) {
         HashMap<String, String> parameters = new HashMap<>();
@@ -40,8 +43,7 @@ public class BinanceService {
         }
     }
 
-    public String getSnapshot(String name) {
-        Optional<Account> account = accountRepository.findById(name);
+    public String getSnapshot(Optional<Account> account) {
         if (account.isEmpty()) {
             return null;
         } else {

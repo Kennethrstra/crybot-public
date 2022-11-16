@@ -1,5 +1,6 @@
 package com.spring.crybot.controllers;
 
+import com.google.gson.JsonObject;
 import com.spring.crybot.models.Article;
 import com.spring.crybot.repositories.NewsRepository;
 import com.spring.crybot.services.CoinMarketCapService;
@@ -18,7 +19,6 @@ import java.util.List;
 public class NewsController {
 
     private final NewsRepository newsRepository;
-
     private final CoinMarketCapService coinMarketCapService;
 
     @GetMapping
@@ -62,7 +62,9 @@ public class NewsController {
 
     @GetMapping("/coinmarketcap/{coins}")
     ResponseEntity<List<Article>> getArticlesCoinMarketCap(@PathVariable String coins) {
-        List<Article> articles = coinMarketCapService.getArticlesCoinMarketCap(coins);
+        String request = coinMarketCapService.coinMarketCapRequest("/content/v3/news", "?coins=" + coins + "&page=1&size=5");
+        JsonObject json = coinMarketCapService.requestToJson(request);
+        List<Article> articles = coinMarketCapService.listCoinMarketCapNews(json);
         return (articles.isEmpty()) ?
                 new ResponseEntity<>(null, HttpStatus.NOT_FOUND) :
                 new ResponseEntity<>(articles, HttpStatus.FOUND);

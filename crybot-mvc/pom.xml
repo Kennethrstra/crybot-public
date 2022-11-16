@@ -11,7 +11,7 @@
     </parent>
     <groupId>com.spring.crybot</groupId>
     <artifactId>crybot-mvc</artifactId>
-    <version>4.3.0-SNAPSHOT</version>
+    <version>4.4.0-SNAPSHOT</version>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -92,11 +92,6 @@
             <groupId>com.github.pengrad</groupId>
             <artifactId>java-telegram-bot-api</artifactId>
             <version>6.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
-            <version>1.13.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>

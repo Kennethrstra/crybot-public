@@ -5,7 +5,7 @@ import com.spring.crybot.repositories.NewsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -13,7 +13,7 @@ public class NewsService {
 
     private final NewsRepository newsRepository;
 
-    public Collection<Article> findNews(String criteria) {
-        return null;
+    public Optional<Article> searchNews(String criteria) {
+        return newsRepository.findById(criteria);
     }
 }

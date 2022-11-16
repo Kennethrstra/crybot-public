@@ -18,7 +18,6 @@ import javax.servlet.http.HttpSession;
 public class LoginController {
 
     private static final String ACCOUNT_ATTRIBUTE = "account";
-
     private final AccountService accountService;
 
     @GetMapping

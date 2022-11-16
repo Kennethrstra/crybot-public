@@ -23,6 +23,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Profile("prod")
 @Component
@@ -59,22 +60,19 @@ public class ProductionScheduledTasks {
     void sendSnapshot() {
         log.info("ProductionScheduledTasks: sendSnapshot()");
         Iterable<Account> accounts = accountRepository.findAll();
-        accounts.forEach((Account) ->
+        accounts.forEach((a) ->
                 {
-                    String s = binanceService.getSnapshot(Account.getName());
+                    Optional<Account> account = Optional.of(a);
+                    String s = binanceService.getSnapshot(Optional.of(a));
                     if (s.contains("\"code\":200")) {
-                        double btceur = (
-                                priceRepository.findById("BTCEUR").isPresent()) ?
-                                priceRepository.findById("BTCEUR").get().getPrice() :
-                                0.0;
+                        double btceur = (priceRepository.findById("BTCEUR").isPresent()) ? priceRepository.findById("BTCEUR").get().getPrice() : 0.0;
                         if (btceur != 0.0) {
                             JsonObject jsonObject = JsonParser.parseString(s).getAsJsonObject();
                             double value = latestTotalAssetOfBtc(jsonObject);
                             BigDecimal e = BigDecimal.valueOf(btceur * value);
                             double eur = e.setScale(2, RoundingMode.HALF_UP).doubleValue();
-                            new Messager("KEY:KEY", Account.getChatId())
-                                    .sendMessage("De waarde van je Binance wallet is BTC " + value + " (Euro = " + eur + ")");
-                            log.info("ProductionScheduledTasks: " + Account.getName() + "'s wallet with a value of " + eur + " send to Telegram chat ID " + Account.getName());
+                            new Messager("KEY:KEY", account.get().getChatId()).sendMessage("De waarde van je Binance wallet is BTC " + value + " (Euro = " + eur + ")");
+                            log.info("ProductionScheduledTasks: " + account.get().getName() + "'s wallet with a value of " + eur + " send to Telegram chat ID " + account.get().getName());
                         } else {
                             log.warn("ProductionScheduledTasks: Could not get value of BTCEUR");
                         }
@@ -88,11 +86,11 @@ public class ProductionScheduledTasks {
         log.info("ProductionScheduledTasks: updateArticles()");
         Iterable<Keyword> keywords = keywordRepository.findAll();
         for (Keyword keyword : keywords) {
-            List<Article> articles = coinMarketCapService.getArticlesCoinMarketCap(keyword.getId());
+            String request = coinMarketCapService.coinMarketCapRequest("/content/v3/news", "?coins=" + keyword.getId() + "&page=1&size=5");
+            JsonObject json = coinMarketCapService.requestToJson(request);
+            List<Article> articles = coinMarketCapService.listCoinMarketCapNews(json);
             for (Article a : articles) {
-                if (!newsRepository.existsById(a.getSlug()) &&
-                        a.getDate().contains(LocalDate.now().toString()) &&
-                        a.getTitle().toLowerCase().contains(keyword.getKeyword())) {
+                if (!newsRepository.existsById(a.getSlug()) && a.getDate().contains(LocalDate.now().toString()) && a.getTitle().toLowerCase().contains(keyword.getKeyword())) {
                     newsRepository.save(a);
                     log.info("ProductionScheduledTasks: Saved Article " + a.getUrl() + " to News repository");
                 }
@@ -103,15 +101,11 @@ public class ProductionScheduledTasks {
     @Scheduled(cron = "0 ${random.int[0,59]} 8-18 ? * *")
     void dispatchArticles() {
         log.info("ProductionScheduledTasks: dispatchArticles()");
-        Messager messager = new Messager("KEY:KEY", -123);
+        Messager messager = new Messager("KEY:KEY", -128);
         Iterable<Article> articles = newsRepository.findAll();
         for (Article a : articles) {
             if (a.isDispatch()) {
-                messager.sendMessage(
-                        "Nieuw artikel - " +
-                                a.getTitle() +
-                                "\n" +
-                                a.getUrl());
+                messager.sendMessage("Nieuw artikel - " + a.getTitle() + "\n" + a.getUrl());
                 a.setDispatch(false);
                 newsRepository.save(a);
                 log.info("ProductionScheduledTasks: Article " + a.getUrl() + " send to Telegram chat ID " + messager.getChatId());
